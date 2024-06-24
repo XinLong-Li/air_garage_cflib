@@ -1,6 +1,3 @@
-[submodule "crazyflie-lib-python"]
-	path = crazyflie-lib-python
-	url = https://github.com/bitcraze/crazyflie-lib-python.git
 [submodule "optitrack_ws/src/vrpn_client_ros"]
 	path = optitrack_ws/src/vrpn_client_ros
 	url = https://github.com/ros-drivers/vrpn_client_ros.git

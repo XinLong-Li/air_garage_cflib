@@ -14,6 +14,8 @@ import numpy as np
 import rospy
 from geometry_msgs.msg import PoseStamped
 
+
+
 URI = 'radio://0/80/2M/E7E7E7E701'
 
 # Only output errors from the logging framework
@@ -54,6 +56,7 @@ if __name__ == '__main__':
     rospy.Subscriber("/vrpn_client_node/cf1/pose", PoseStamped, cf1_callback)
    
     with SyncCrazyflie(URI) as scf:
+        cf = scf.cf
         # ext_pose = Extpos(scf)
         # rd_pos = PositionHlCommander(scf)
         # int_pose = [0.0, 0.0, 0.0]
@@ -63,7 +66,7 @@ if __name__ == '__main__':
         #     print("enter loop")
         #     if(IS_POSE_UPDATED==True):
         #         IS_POSE_UPDATED = False
-        #         ext_pose.send_extpose(cur_pose[0], cur_pose[1], cur_pose[2], 
+        #         cf.extpos.send_extpose(cur_pose[0], cur_pose[1], cur_pose[2], 
         #                             cur_pose[3], cur_pose[4], cur_pose[5], cur_pose[6])
         #         int_pos =rd_pos.get_position
         #         print('**************')
@@ -75,15 +78,17 @@ if __name__ == '__main__':
             print('Taking off!')
             time.sleep(0.1)
 
-            ext_pose = Extpos(scf)
-            rd_pos = PositionHlCommander(scf)
+            # ext_pose = Extpos(cf)
+            rd_pos = PositionHlCommander(cf)
             int_pose = [0.0, 0.0, 0.0]
 
             while not rospy.is_shutdown():
                 if(IS_POSE_UPDATED):
-                    ext_pose.send_extpose(cur_pose[0], cur_pose[1], cur_pose[2],
+                    cf.extpos.send_extpose(cur_pose[0], cur_pose[1], cur_pose[2],
                                           cur_pose[3], cur_pose[4], cur_pose[5], cur_pose[6])
                     int_pos =rd_pos.get_position
+                    mc.forward(0.5)
+                    mc.back(0.5)
                     print("Enter the while loop")
                 rate.sleep()
 
