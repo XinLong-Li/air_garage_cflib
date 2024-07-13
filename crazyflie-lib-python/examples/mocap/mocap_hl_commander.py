@@ -245,7 +245,7 @@ def handle_pose(pose):
 
         # writer.writerow([t, pose])
 
-    send_extpose_quat(cf, pose[0], pose[1], pose[2], pose[3])
+    send_extpose_quat(cf, pose[0], pose[1], pose[2], pose[3]) # x, y, z, quat
 
 
 if __name__ == '__main__':
@@ -253,6 +253,10 @@ if __name__ == '__main__':
 
     # 创建一个新的CSV文件，文件名是当前的时间戳
     filename = datetime.now().strftime('%Y%m%d_%H_%M_%S') + '.csv'
+    filename_collection = 'filename_collection.txt'
+
+    with open(filename_collection, 'a') as file:
+        file.write(filename + '\n')
 
     # 创建一个新的CSV文件，文件名是当前的时间戳
     filename = os.path.join('mocap_data', datetime.now().strftime('%Y%m%d_%H_%M_%S') + '.csv')
