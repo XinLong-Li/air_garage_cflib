@@ -53,7 +53,7 @@ class MotionCommander:
     VELOCITY = 0.2
     RATE = 360.0 / 5
 
-    def __init__(self, crazyflie, default_height=0.3):
+    def __init__(self, crazyflie, default_height=0.5, default_velocity=VELOCITY):
         """
         Construct an instance of a MotionCommander
 
@@ -69,6 +69,7 @@ class MotionCommander:
 
         self._is_flying = False
         self._thread = None
+        self.VELOCITY = default_velocity
 
     # Distance based primitives
 
