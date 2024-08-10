@@ -5,3 +5,11 @@
 20240625_22_42_47.csv
 20240625_22_46_50.csv
 20240625_22_48_30.csv
+mocap_data/20240810_15_04_26.csv #
+mocap_data/20240810_15_45_11.csv
+mocap_data/20240810_17_36_56.csv
+mocap_data/20240810_17_42_39.csv
+mocap_data/20240810_17_49_46.csv
+mocap_data/20240810_17_54_57.csv
+mocap_data/20240810_17_58_29.csv # 10 centimeter high, go through the tunnel
+mocap_data/20240810_23_32_34.csv # 10 centimeter high, go through the tunnel

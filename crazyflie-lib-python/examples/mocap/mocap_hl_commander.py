@@ -51,7 +51,7 @@ from datetime import datetime
 uri = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E7')
 
 # The host name or ip address of the mocap system
-host_name = '192.168.254.102'
+host_name = '192.168.254.110'
 
 # The type of the mocap system
 # Valid options are: 'vicon', 'optitrack', 'optitrack_closed_source', 'qualisys', 'nokov', 'vrpn', 'motionanalysis'
@@ -214,7 +214,7 @@ def upload_trajectory(cf, trajectory_id, trajectory):
 def run_sequence(cf, trajectory_id, duration):
     commander = cf.high_level_commander
 
-    commander.takeoff(1.0, 2.0)
+    commander.takeoff(0.15, 2.0)
     time.sleep(3.0)
     relative = True
     commander.start_trajectory(trajectory_id, 1.0, relative)
