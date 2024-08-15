@@ -158,20 +158,21 @@ def pose_callback(data):
     '''
     callback function for the crazyflie pose subscriber
     '''
-    t = time.time()
+    # t = time.time()
     pose = [data.pose.position.x, data.pose.position.y, data.pose.position.z, data.pose.orientation]
     with open(filename, 'a', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow([t, pose[0], pose[1], pose[2], pose[3].x, pose[3].y, pose[3].z, pose[3].w])
+        writer.writerow([time.time(), pose[0], pose[1], pose[2], pose[3].x, pose[3].y, pose[3].z, pose[3].w])
     send_extpose_quat(cf, pose[0], pose[1], pose[2], pose[3]) # x, y, z, quat
 
 
 if __name__ == '__main__':
+    print(f"{time.time():.4f} : Start the program")
     cflib.crtp.init_drivers()
 
     # 在mocap_data目录下创建一个新的CSV文件，文件名是当前的时间戳
     filename = os.path.join('mocap_data', datetime.now().strftime('%Y%m%d_%H_%M_%S') + '.csv')
-    filename_collection = 'filename_collection.txt'
+    filename_collection = 'mocap_data_description.md'
 
     with open(filename_collection, 'a') as file:
         file.write(filename + '\n')
@@ -202,17 +203,21 @@ if __name__ == '__main__':
         trajectory_id = 1
 
         rospy.init_node('cf_lxl_node', anonymous=True)
-        rospy.Subscriber("/vrpn_client_node/cf_lxl/pose", PoseStamped, pose_callback)
+        rospy.Subscriber("/vrpn_client_node/cf_lxl_sm/pose", PoseStamped, pose_callback)
 
         adjust_orientation_sensitivity(cf)
         activate_kalman_estimator(cf)
         reset_estimator(cf)
+        print(f"{time.time():.4f} : start MotionCommander")
 
         # I have add a parameter 'velocity' to the original initialization function.
-        with MotionCommander(scf,0.1,0.2) as mc:
-            print('Taking off!')
+        with MotionCommander(scf,0.5,0.1) as mc:
+            print(f"{time.time():.4f} : taking off")
             # mc.forward(1.0,0.5) # This command can be used to execute a uniform speed trajectory.
-            time.sleep(3)
-            mc.move_distance(1.5, 0.0, 0.0, 0.5)
-            time.sleep(3)
-            print('Landing!')
+            time.sleep(4)
+            print(f"{time.time():.4f} : after sleeping 4 seconds")
+            mc.move_distance(1.0, 0.0, 0.0, 0.5)
+            print(f"{time.time():.4f} : after moving 1.0m")
+            time.sleep(1)
+            print(f"{time.time():.4f} : landing")
+        print(f"{time.time():.4f} : landed")
