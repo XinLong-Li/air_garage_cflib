@@ -3,6 +3,7 @@ This script is used to get the pose of the crazyflie
 in the optitrack mocap system through VRPN. Then 
 forward the pose information to the crazyflie.
 """
+import math
 import time
 import logging
 from datetime import datetime
@@ -10,6 +11,7 @@ from datetime import datetime
 import cflib.crtp
 from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
 from cflib.positioning.motion_commander import MotionCommander
+from cflib.positioning.position_hl_commander import PositionHlCommander
 
 import numpy as np
 import rospy
@@ -26,6 +28,7 @@ from cflib.utils import uri_helper
 import os
 import csv
 
+filename = None
 # URI to the Crazyflie to connect to
 uri = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E7')
 
@@ -153,50 +156,69 @@ def run_sequence(cf, trajectory_id, duration):
     commander.stop()
 
 
+def figure_eight_flight(commander, radius, steps, velocity):
+    """
+    Perform a horizontal figure-eight flight.
+
+    :param commander: The commander object that has the go_to method.
+    :param radius: The radius of the figure-eight loops.
+    :param steps: The number of steps to divide each loop into.
+    :param velocity: The velocity of the movement.
+    """
+    for i in range(steps):
+        angle = 2 * math.pi * (i / steps)
+        x = radius * math.sin(angle)
+        y = radius * math.sin(2 * angle)
+        commander.go_to(x, y, 0, velocity)
+        time.sleep(0.1)  # Adjust sleep time as needed
+
+
+def spiral_ascent(commander, radius, height, turns, steps, velocity):
+    """
+    Perform a spiral ascent.
+
+    :param commander: The commander object that has the go_to method.
+    :param radius: The radius of the spiral.
+    :param height: The total height to ascend.
+    :param turns: The number of turns in the spiral.
+    :param steps: The number of steps to divide the spiral into.
+    :param velocity: The velocity of the movement.
+    """
+    for i in range(steps):
+        angle = 2 * math.pi * turns * (i / steps)
+        x = radius * math.cos(angle)
+        y = radius * math.sin(angle)
+        z = (height / steps) * i + 0.5
+        commander.go_to(x, y, z, velocity)
+        time.sleep(0.1)  # Adjust sleep time as needed
+
 
 def pose_callback(data):
     '''
     callback function for the crazyflie pose subscriber
     '''
-    # t = time.time()
+    t = time.time()
+    global filename  # Declare filename as global to modify the global variable
     pose = [data.pose.position.x, data.pose.position.y, data.pose.position.z, data.pose.orientation]
-    with open(filename, 'a', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow([time.time(), pose[0], pose[1], pose[2], pose[3].x, pose[3].y, pose[3].z, pose[3].w])
     send_extpose_quat(cf, pose[0], pose[1], pose[2], pose[3]) # x, y, z, quat
+    with open(filename, 'a', newline='', encoding='utf-8') as cb_file:
+        pose_writer = csv.writer(cb_file)
+        pose_writer.writerow([t, pose[0], pose[1], pose[2], pose[3].x, pose[3].y, pose[3].z, pose[3].w])
+
 
 
 if __name__ == '__main__':
     print(f"{time.time():.4f} : Start the program")
     cflib.crtp.init_drivers()
 
-    # 在mocap_data目录下创建一个新的CSV文件，文件名是当前的时间戳
     filename = os.path.join('mocap_data', datetime.now().strftime('%Y%m%d_%H_%M_%S') + '.csv')
-    filename_collection = 'mocap_data_description.md'
-
-    with open(filename_collection, 'a') as file:
-        file.write(filename + '\n')
-
-    # 在文件的开始处写入标题行
-    with open(filename, 'w', newline='') as file:
+    with open(filename, 'w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
         writer.writerow(['t', 'x', 'y', 'z', 'qx', 'qy', 'qz', 'qw'])
 
-    # with SyncCrazyflie(URI, cf=Crazyflie(rw_cache='./cache')) as scf:
-    #     cf = scf.cf
-
-    #     rospy.init_node('cf_lxl_node', anonymous=True)
-    #     rospy.Subscriber("/vrpn_client_node/cf_lxl/pose", PoseStamped, pose_callback)
-
-    #     trajectory_id = 1
-
-    #     adjust_orientation_sensitivity(cf)
-    #     activate_kalman_estimator(cf)
-    #     # activate_mellinger_controller(cf)
-    #     duration = upload_trajectory(cf, trajectory_id, straight_line)
-    #     print('The sequence is {:.1f} seconds long'.format(duration))
-    #     reset_estimator(cf)
-    #     run_sequence(cf, trajectory_id, duration)
+    filename_collection = 'mocap_data_description.md'
+    with open(filename_collection, 'a', encoding='utf-8') as file:
+        file.write(filename + '\n')
 
     with SyncCrazyflie(uri, cf=Crazyflie(rw_cache='./cache')) as scf:
         cf = scf.cf
@@ -208,16 +230,26 @@ if __name__ == '__main__':
         adjust_orientation_sensitivity(cf)
         activate_kalman_estimator(cf)
         reset_estimator(cf)
-        print(f"{time.time():.4f} : start MotionCommander")
 
+        # print(f"{time.time():.4f} : start MotionCommander")
         # I have add a parameter 'velocity' to the original initialization function.
-        with MotionCommander(scf,0.5,0.1) as mc:
+        # with MotionCommander(scf,0.5,0.1) as mc:
+        #     print(f"{time.time():.4f} : taking off")
+        #     # mc.forward(1.0,0.5) # This command can be used to execute a uniform speed trajectory.
+        #     time.sleep(1)
+        #     print(f"{time.time():.4f} : after sleeping 1 seconds")
+        #     mc.move_distance(1.0, 0.0, 0.0, 0.5)
+        #     print(f"{time.time():.4f} : after moving 1.0m")
+        #     time.sleep(1)
+        #     print(f"{time.time():.4f} : landing")
+
+        print(f"{time.time():.4f} : start PositionHlCommander")
+        with PositionHlCommander(scf, 0.0, 0.0, 0.5, 0.5, 0.5) as pc:
             print(f"{time.time():.4f} : taking off")
-            # mc.forward(1.0,0.5) # This command can be used to execute a uniform speed trajectory.
-            time.sleep(4)
-            print(f"{time.time():.4f} : after sleeping 4 seconds")
-            mc.move_distance(1.0, 0.0, 0.0, 0.5)
-            print(f"{time.time():.4f} : after moving 1.0m")
             time.sleep(1)
-            print(f"{time.time():.4f} : landing")
+            # print(f"{time.time():.4f} : after sleeping 1 seconds")
+            # pc.go_to(1.0, 0.0, 0.5, 0.5)
+            # print(f"{time.time():.4f} : after moving 1.0m")
+            spiral_ascent(pc, radius=0.3, height= 1.0, turns=5, steps=60, velocity=0.5)
+            time.sleep(1)
         print(f"{time.time():.4f} : landed")

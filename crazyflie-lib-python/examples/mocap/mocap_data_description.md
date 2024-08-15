@@ -45,3 +45,18 @@ mocap_data/20240815_00_27_14.csv
 mocap_data/20240815_00_29_10.csv # set 50 cm high, without ceiling, calibrate the position tracking system
 mocap_data/20240815_00_39_35.csv
 mocap_data/20240815_00_45_16.csv
+mocap_data/20240815_14_26_14.csv
+mocap_data/20240815_19_57_56.csv # set 50 cm high, no delay
+mocap_data/20240815_19_58_50.csv # set 50 cm high, no delay
+mocap_data/20240815_20_00_27.csv # set 50 cm high, no delay
+
+# The following data is collected by using PositionHLCommander class
+
+mocap_data/20240815_22_05_06.csv
+mocap_data/20240815_23_59_15.csv
+mocap_data/20240816_00_03_47.csv
+
+## Spiral ascent flight test
+
+mocap_data/20240816_00_11_25.csv # the first spiral ascent flight test
+mocap_data/20240816_00_22_16.csv # a successful spiral ascent flight
