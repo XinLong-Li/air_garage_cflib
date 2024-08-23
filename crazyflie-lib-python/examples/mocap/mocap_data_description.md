@@ -20,7 +20,7 @@ mocap_data/20240811_00_18_00.csv # set 5 centimeter high, go through the tunnel,
 mocap_data/20240811_00_55_50.csv
 mocap_data/20240811_01_00_15.csv
 mocap_data/20240811_01_14_19.csv
-mocap_data/20240811_01_15_48.csv # set 5 cm high, 8 building blocks high(1.428*8), not collide with thee ceiling
+mocap_data/20240811_01_15_48.csv # set 5 cm high, 8 building blocks high(1.428*8), not collide with the ceiling
 mocap_data/20240811_01_18_04.csv # set 5 cm high, 4 building blocks high(1.428*4=5.712 cm), collide with the ceiling, delay 3 seconds after takeoff
 mocap_data/20240811_01_38_40.csv
 mocap_data/20240811_01_41_35.csv # set 6 cm high, 4 building blocks high(1.428*4=5.712 cm), collide with the ceiling, delay 4 seconds after takeoff
@@ -60,3 +60,71 @@ mocap_data/20240816_00_03_47.csv
 
 mocap_data/20240816_00_11_25.csv # the first spiral ascent flight test
 mocap_data/20240816_00_22_16.csv # a successful spiral ascent flight
+mocap_data/20240820_00_10_33.csv
+
+# Minimum Height Hover Test
+
+
+mocap_data/20240821_16_36_54.csv
+mocap_data/20240821_16_44_07.csv
+mocap_data/20240821_17_07_06.csv
+
+mocap_data/20240821_17_23_10.csv
+mocap_data/20240821_17_31_39.csv
+mocap_data/20240821_17_48_25.csv
+mocap_data/20240821_17_57_21.csv
+mocap_data/20240821_18_01_45.csv
+mocap_data/20240821_18_05_12.csv # set 0.5m，real height is 0.56m
+mocap_data/20240822_17_29_40.csv # set 0.44m，real height is 0.498m
+mocap_data/20240822_17_35_39.csv # set 0.44m，real height is 0.497m
+
+mocap_data/20240822_17_48_07.csv
+mocap_data/20240822_17_52_59.csv
+mocap_data/20240822_17_56_30.csv
+mocap_data/20240822_17_58_56.csv
+mocap_data/20240822_18_03_19.csv
+mocap_data/20240822_18_09_53.csv # 起飞后，延时了20s，发现是z轴的超调需要时间来消除，在延时14秒的时候基本达到了期望高度。
+mocap_data/20240822_18_23_29.csv # 也就是说，延时14s的时候基本达到了设定高度，会有+-5mm的波动，如果更换其他高度，跟踪时间可能会有所不同。
+
+
+## 8 blocks, the ceiling height is 8*14.28mm=114.24mm, set 114.24mm/2=57.12mm high
+
+mocap_data/20240822_21_31_06.csv # 8 blocks, set 0.057m high, a fail flight, didn't take off
+mocap_data/20240822_21_32_29.csv # 8 blocks, set 0.057m high, a successful flight
+mocap_data/20240822_21_35_34.csv # 8 blocks, set 0.057m high, a successful flight
+mocap_data/20240822_21_38_32.csv # 8 blocks, set 0.057m high, a fail flight, didn't take off, doubt the blocks blocked the mocap system
+
+mocap_data/20240822_21_43_50.csv # 8 blocks, set 0.057m high, a successful flight
+mocap_data/20240822_21_49_06.csv # no ceiling, set 0.057m high, a successful flight
+mocap_data/20240822_21_53_18.csv # no ceiling, set 0.057m high, a successful flight
+
+## 6 blocks,  the ceiling height is 6*14.28mm=85.68mm, set 85.68mm/2=42.84mm high
+
+mocap_data/20240822_22_02_30.csv # set 0.042m high, a successful flight
+mocap_data/20240822_22_14_56.csv # set 0.042m high, a successful flight
+mocap_data/20240822_22_17_21.csv # set 0.042m high, a successful flight
+mocap_data/20240822_22_21_06.csv # no ceiling, a successful flight
+mocap_data/20240822_22_22_43.csv # no ceiling, a successful flight
+mocap_data/20240822_22_25_44.csv # no ceiling, a successful flight
+
+## 4 blocks, the ceiling height is 4*14.28mm=57.12mm, set 57.12mm/2=28.56mm high
+
+mocap_data/20240822_22_37_19.csv # set 0.028m high, didn't take off totally, the initial height is 0.028
+mocap_data/20240822_22_48_12.csv # set 0.028m high, didn't take off totally, the initial height is 0.028
+mocap_data/20240822_22_50_52.csv
+mocap_data/20240822_22_52_35.csv # set 0.035m high, didn't take off totally
+mocap_data/20240822_22_54_22.csv # set 0.035m high, didn't take off totally
+mocap_data/20240822_22_59_51.csv # set 0.035m high, didn't take off totally
+mocap_data/20240822_23_05_30.csv # set 0.04 high, didn't take off totally, because the mocap lost the crazyflie capture due to the low height, the acrylic board is too close to the marker.
+
+mocap_data/20240822_23_09_12.csv # set 0.04 high, collide with the ceiling
+mocap_data/20240822_23_31_19.csv # set 0.035 high, collide with the ceiling
+mocap_data/20240822_23_34_04.csv
+mocap_data/20240822_23_36_10.csv
+mocap_data/20240822_23_37_03.csv # set 0.03 high, didn't take off totally
+mocap_data/20240822_23_40_33.csv
+mocap_data/20240822_23_43_14.csv
+mocap_data/20240822_23_49_00.csv # set 0.35 high, didn't take off totally
+mocap_data/20240822_23_50_54.csv # set 0.04 high, collide with the ceiling
+mocap_data/20240823_14_33_45.csv
+mocap_data/20240823_14_37_35.csv

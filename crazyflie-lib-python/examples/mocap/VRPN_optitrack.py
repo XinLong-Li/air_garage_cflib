@@ -156,7 +156,7 @@ def run_sequence(cf, trajectory_id, duration):
     commander.stop()
 
 
-def figure_eight_flight(commander, radius, steps, velocity):
+def figure_eight_flight(commander, radius, steps, velocity, default_height = 0.5):
     """
     Perform a horizontal figure-eight flight.
 
@@ -169,11 +169,11 @@ def figure_eight_flight(commander, radius, steps, velocity):
         angle = 2 * math.pi * (i / steps)
         x = radius * math.sin(angle)
         y = radius * math.sin(2 * angle)
-        commander.go_to(x, y, 0, velocity)
+        commander.go_to(x, y, default_height, velocity)
         time.sleep(0.1)  # Adjust sleep time as needed
 
 
-def spiral_ascent(commander, radius, height, turns, steps, velocity):
+def spiral_ascent(commander, radius, height, turns, steps, velocity, initial_height = 0.5):
     """
     Perform a spiral ascent.
 
@@ -188,9 +188,23 @@ def spiral_ascent(commander, radius, height, turns, steps, velocity):
         angle = 2 * math.pi * turns * (i / steps)
         x = radius * math.cos(angle)
         y = radius * math.sin(angle)
-        z = (height / steps) * i + 0.5
+        z = (height / steps) * i + initial_height
         commander.go_to(x, y, z, velocity)
         time.sleep(0.1)  # Adjust sleep time as needed
+
+def move_straight(pc, x, y, z, velocity):
+    """
+    Moves the object in a straight line to the specified coordinates.
+
+    :param pc: The object that has the go_to method.
+    :param x: The target x-coordinate.
+    :param y: The target y-coordinate.
+    :param z: The target z-coordinate.
+    :param velocity: the velocity of the movement.
+    """
+    print(f"{time.time():.4f} : before moving to ({x}, {y}, {z})")
+    pc.go_to(x, y, z, velocity)
+    print(f"{time.time():.4f} : after moving to ({x}, {y}, {z})")
 
 
 def pose_callback(data):
@@ -205,6 +219,17 @@ def pose_callback(data):
         pose_writer = csv.writer(cb_file)
         pose_writer.writerow([t, pose[0], pose[1], pose[2], pose[3].x, pose[3].y, pose[3].z, pose[3].w])
 
+def land_on_elevated_surface():
+    with SyncCrazyflie(uri, cf=Crazyflie(rw_cache='./cache')) as scf:
+        with PositionHlCommander(scf,
+                                 default_height=0.5,
+                                 default_velocity=0.2,
+                                 default_landing_height=0.35,
+                                 controller=PositionHlCommander.CONTROLLER_PID) as pc:
+            # fly onto a landing platform at non-zero height (ex: from floor to desk, etc)
+            pc.forward(1.0)
+            pc.left(1.0)
+            # land() will be called on context exit, gradually lowering to default_landing_height, then stopping motors
 
 
 if __name__ == '__main__':
@@ -225,7 +250,7 @@ if __name__ == '__main__':
         trajectory_id = 1
 
         rospy.init_node('cf_lxl_node', anonymous=True)
-        rospy.Subscriber("/vrpn_client_node/cf_lxl_sm/pose", PoseStamped, pose_callback)
+        rospy.Subscriber("/vrpn_client_node/cf_lxl/pose", PoseStamped, pose_callback)
 
         adjust_orientation_sensitivity(cf)
         activate_kalman_estimator(cf)
@@ -244,12 +269,18 @@ if __name__ == '__main__':
         #     print(f"{time.time():.4f} : landing")
 
         print(f"{time.time():.4f} : start PositionHlCommander")
-        with PositionHlCommander(scf, 0.0, 0.0, 0.5, 0.5, 0.5) as pc:
+        with PositionHlCommander(scf, 0.0, 0.0, 0.0,
+                                 default_velocity=0.1,
+                                 default_height=0.04,
+                                 default_landing_height=0.0) as pc:
+            SET_HEIGHT = 0.44
+            SET_DELAY = 15
             print(f"{time.time():.4f} : taking off")
             time.sleep(1)
-            # print(f"{time.time():.4f} : after sleeping 1 seconds")
-            # pc.go_to(1.0, 0.0, 0.5, 0.5)
-            # print(f"{time.time():.4f} : after moving 1.0m")
-            spiral_ascent(pc, radius=0.3, height= 1.0, turns=5, steps=60, velocity=0.5)
-            time.sleep(1)
+            print(f"{time.time():.4f} : after sleeping 1 seconds")
+            # pc.go_to(0.0,0.0,SET_HEIGHT)
+            # print(f"{time.time():.4f} : after moving to (0,0,{SET_HEIGHT})")
+            # spiral_ascent(pc, radius=0.3, height= 1.0, turns=5, steps=60, velocity=0.5)
+            time.sleep(SET_DELAY)
+            print(f"{time.time():.4f} : after sleeping {SET_DELAY} seconds")
         print(f"{time.time():.4f} : landed")
