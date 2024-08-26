@@ -1,3 +1,21 @@
+# 20240823
+
+$$ x_n = x_{n-1} \cdot (1 + R) - y $$
+
+## ToDo 20240823
+
+1. 测试我的固件库在6 blocks、5 blocks、4 blocks下的表现
+2. 升级亚克力板机库，可以调节高度，并且四面封闭，同时拐角处要尽量减少放光。当前发现在亚克力板下面，对crazyflie的position识别会不同，大概2mm的影响。
+
+## Log 20240823
+
+1. Today, I change the crazyflie from ground to table, and test the hover on the table. The table height is 0.789m, and I set the offset height to 0.04m. The actual height is 0.789+0.04=0.829m. Each time the crazyflie take off from the same position(0.0, 0.0, 0.789). The max overshoot is 0.02m, setting the SET_DELAY value to 15s is enough to converge to the set height.
+2.  我已经测试完了下降穿越，也测试了多次，发现在6块积木下这都不是问题。测试的时候每次起飞或降落等切换高度的时候，都要等待一段时间，让控制器的过冲收敛到设定值。这个时间是多少呢？我发现15s是一个比较合适的值。
+3. 接下来搞清楚一下有没有速度控制？还是只是位置控制？
+
+4. 接下来可以测试一下我自己编写的固件库。
+
+
 # 20240822
 
 ## ToDo 20240822

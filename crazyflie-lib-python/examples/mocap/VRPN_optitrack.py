@@ -243,14 +243,14 @@ if __name__ == '__main__':
 
     filename_collection = 'mocap_data_description.md'
     with open(filename_collection, 'a', encoding='utf-8') as file:
-        file.write(filename + '\n')
+        file.write(f'`{filename}`\n')
 
     with SyncCrazyflie(uri, cf=Crazyflie(rw_cache='./cache')) as scf:
         cf = scf.cf
         trajectory_id = 1
 
         rospy.init_node('cf_lxl_node', anonymous=True)
-        rospy.Subscriber("/vrpn_client_node/cf_lxl/pose", PoseStamped, pose_callback)
+        rospy.Subscriber("/vrpn_client_node/cf_lxl_sm/pose", PoseStamped, pose_callback)
 
         adjust_orientation_sensitivity(cf)
         activate_kalman_estimator(cf)
@@ -268,19 +268,27 @@ if __name__ == '__main__':
         #     time.sleep(1)
         #     print(f"{time.time():.4f} : landing")
 
+        X_INIT = -0.23
+        Y_INIT = 0.006
+        Z_INIT = 0.792
+        OFFSET_HEIGHT = 0.01
+        STABLE_DELAY = 10
+        GARAGE_CENTER = (1, 0.0, Z_INIT)
+        PARK_VEL = 1
         print(f"{time.time():.4f} : start PositionHlCommander")
-        with PositionHlCommander(scf, 0.0, 0.0, 0.0,
-                                 default_velocity=0.1,
-                                 default_height=0.04,
-                                 default_landing_height=0.0) as pc:
+        with PositionHlCommander(scf, X_INIT, Y_INIT, Z_INIT,
+                                 default_velocity = 0.5,
+                                 default_height = Z_INIT + 0.2,
+                                 default_landing_height = 0.05) as pc:
             SET_HEIGHT = 0.44
-            SET_DELAY = 15
             print(f"{time.time():.4f} : taking off")
-            time.sleep(1)
-            print(f"{time.time():.4f} : after sleeping 1 seconds")
-            # pc.go_to(0.0,0.0,SET_HEIGHT)
-            # print(f"{time.time():.4f} : after moving to (0,0,{SET_HEIGHT})")
+            time.sleep(STABLE_DELAY)
+            print(f"{time.time():.4f} : after sleeping {STABLE_DELAY} seconds")
+            pc.down(0.19 - OFFSET_HEIGHT,0.2)
+            time.sleep(STABLE_DELAY)
+            print(f"{time.time():.4f} : after sleeping {STABLE_DELAY} seconds")
+            pc.go_to(*GARAGE_CENTER, PARK_VEL)
+            print(f"{time.time():.4f} : after moving to {GARAGE_CENTER}")
             # spiral_ascent(pc, radius=0.3, height= 1.0, turns=5, steps=60, velocity=0.5)
-            time.sleep(SET_DELAY)
-            print(f"{time.time():.4f} : after sleeping {SET_DELAY} seconds")
+            time.sleep(1)
         print(f"{time.time():.4f} : landed")

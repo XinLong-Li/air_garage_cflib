@@ -62,7 +62,7 @@ mocap_data/20240816_00_11_25.csv # the first spiral ascent flight test
 mocap_data/20240816_00_22_16.csv # a successful spiral ascent flight
 mocap_data/20240820_00_10_33.csv
 
-# Minimum Height Hover Test
+## Minimum Height Hover Test
 
 
 mocap_data/20240821_16_36_54.csv
@@ -83,8 +83,13 @@ mocap_data/20240822_17_52_59.csv
 mocap_data/20240822_17_56_30.csv
 mocap_data/20240822_17_58_56.csv
 mocap_data/20240822_18_03_19.csv
-mocap_data/20240822_18_09_53.csv # 起飞后，延时了20s，发现是z轴的超调需要时间来消除，在延时14秒的时候基本达到了期望高度。
-mocap_data/20240822_18_23_29.csv # 也就是说，延时14s的时候基本达到了设定高度，会有+-5mm的波动，如果更换其他高度，跟踪时间可能会有所不同。
+
+### Found the z tracking error cause: Overshoot
+
+起飞后，延时了20s，发现是z轴的超调需要时间来消除，在延时14秒的时候基本达到了期望高度。也就是说，延时14s的时候基本达到了设定高度，会有+-5mm的波动，如果更换其他高度，跟踪时间可能会有所不同。
+
+`mocap_data/20240822_18_09_53.csv`
+mocap_data/20240822_18_23_29.csv 
 
 
 ## 8 blocks, the ceiling height is 8*14.28mm=114.24mm, set 114.24mm/2=57.12mm high
@@ -126,5 +131,63 @@ mocap_data/20240822_23_40_33.csv
 mocap_data/20240822_23_43_14.csv
 mocap_data/20240822_23_49_00.csv # set 0.35 high, didn't take off totally
 mocap_data/20240822_23_50_54.csv # set 0.04 high, collide with the ceiling
-mocap_data/20240823_14_33_45.csv
-mocap_data/20240823_14_37_35.csv
+
+# Test on the table
+
+## Hover on the table
+
+### Set the offset height to 0.04m, The table height is 0.789m, The actual height is 0.789+0.04=0.829m
+
+Each time the crazyflie take off from the same position(0.0, 0.0, 0.789).The following three data are collected during this condition.
+The max overshoot is 0.02m, setting the SET_DELAY value to 15s is enough to converge to the set height.
+
+mocap_data/20240823_16_23_49.csv
+mocap_data/20240823_16_34_07.csv # set the SET_DELAY = 15
+mocap_data/20240823_16_48_25.csv # set the SET_DELAY = 20
+mocap_data/20240823_17_13_29.csv # failed to take off,set the SET_DELAY = 20
+mocap_data/20240823_17_17_04.csv #  set the SET_DELAY = 20
+
+## Set the offset height to 0.02m, set the SET_DELAY = 15
+
+mocap_data/20240823_17_25_20.csv # no ceiling, set 0.02m high, a successful flight
+mocap_data/20240823_17_35_08.csv # with 4 blocks high ceiling, set 0.02m high, sucked to the ceiling
+
+## Set the offset height to 0.01m, set the SET_DELAY = 15
+
+mocap_data/20240823_17_42_02.csv # with 4 blocks high ceiling, better than 0.02m, but still sucked to the ceiling
+
+### 5 blocks,hover
+Take off two slow
+
+mocap_data/20240823_17_47_21.csv # with ceiling , a successful flight
+`mocap_data/20240823_19_27_09.csv` with ceiling , a successful flight
+`mocap_data/20240823_19_37_29.csv` with ceiling, good at begin, sucked to the ceiling at last
+
+## Land into the tunnel
+
+Take off from an outside position (-0.204,-0.002,0.791), and land into the tunnel.
+
+`mocap_data/20240823_20_17_17.csv` with ceiling, sucked to the ceiling at last, the `OFFSET_HEIGHT` is 0.02m
+`mocap_data/20240823_22_50_12.csv`
+`mocap_data/20240823_22_51_47.csv` with ceiling, sucked to the ceiling at last, the `OFFSET_HEIGHT` is 0.01m
+
+## Pass through the tunnel,(take off then pass though the tunnel)
+
+
+`mocap_data/20240823_23_23_04.csv` with ceiling， 
+`mocap_data/20240823_23_32_30.csv` crashed into the ceiling, the `OFFSET_HEIGHT` is 0.01m, the speed is 0.5m/s
+
+`mocap_data/20240823_23_47_49.csv` collided with the ceiling, the `OFFSET_HEIGHT` is 0.01m, the speed is 1m/s
+
+`mocap_data/20240823_23_51_06.csv` same as the last data
+
+`mocap_data/20240823_23_53_34.csv` increase the blocks from 5 to 6, the `OFFSET_HEIGHT` is 0.01m, the speed is 1m/s, perfect pass through the tunnel
+
+`mocap_data/20240823_23_58_03.csv` as perfect as the last data
+
+## Pass through the tunnel, (Land form high then pass through the tunnel)
+
+Both of the following data are collected from very successful flights.
+`mocap_data/20240824_00_08_07.csv` First,take off from the table with a relative height 0.2m, then down 0.19m, then go through the tunnel
+`mocap_data/20240824_00_11_24.csv` First, take off from the table with a relative height 0.2m, then down 0.18m, then go through the tunnel
+
