@@ -173,7 +173,8 @@ def figure_eight_flight(commander, radius, steps, velocity, default_height = 0.5
         time.sleep(0.1)  # Adjust sleep time as needed
 
 
-def spiral_ascent(commander, radius, height, turns, steps, velocity, initial_height = 0.5):
+def spiral_ascent(commander: PositionHlCommander, 
+                  radius, height, turns, steps, velocity, initial_height = 0.5) -> None:
     """
     Perform a spiral ascent.
 
@@ -192,7 +193,7 @@ def spiral_ascent(commander, radius, height, turns, steps, velocity, initial_hei
         commander.go_to(x, y, z, velocity)
         time.sleep(0.1)  # Adjust sleep time as needed
 
-def move_straight(pc, x, y, z, velocity):
+def move_straight(pc: PositionHlCommander, x, y, z, velocity):
     """
     Moves the object in a straight line to the specified coordinates.
 
@@ -268,27 +269,30 @@ if __name__ == '__main__':
         #     time.sleep(1)
         #     print(f"{time.time():.4f} : landing")
 
-        X_INIT = -0.23
-        Y_INIT = 0.006
-        Z_INIT = 0.792
-        OFFSET_HEIGHT = 0.01
-        STABLE_DELAY = 10
-        GARAGE_CENTER = (1, 0.0, Z_INIT)
+        X_INIT = 0.001
+        Y_INIT = 0.001
+        Z_INIT = 0.791
+        TAKEOFF_HEIGHT = 0.01 # Height to take off from table plane
+        OFFSET_HEIGHT = 0.01 # Height offset to table plane
+        STABLE_DELAY = 15 # Time delay to stabilize after height change
+        GARAGE_CENTER = (1, 0.0, Z_INIT) # Center of garage
         PARK_VEL = 1
         print(f"{time.time():.4f} : start PositionHlCommander")
         with PositionHlCommander(scf, X_INIT, Y_INIT, Z_INIT,
                                  default_velocity = 0.5,
-                                 default_height = Z_INIT + 0.2,
-                                 default_landing_height = 0.05) as pc:
-            SET_HEIGHT = 0.44
+                                 default_height = Z_INIT + TAKEOFF_HEIGHT,
+                                 default_landing_height = Z_INIT) as pc:
+            
             print(f"{time.time():.4f} : taking off")
             time.sleep(STABLE_DELAY)
             print(f"{time.time():.4f} : after sleeping {STABLE_DELAY} seconds")
-            pc.down(0.19 - OFFSET_HEIGHT,0.2)
-            time.sleep(STABLE_DELAY)
-            print(f"{time.time():.4f} : after sleeping {STABLE_DELAY} seconds")
-            pc.go_to(*GARAGE_CENTER, PARK_VEL)
-            print(f"{time.time():.4f} : after moving to {GARAGE_CENTER}")
-            # spiral_ascent(pc, radius=0.3, height= 1.0, turns=5, steps=60, velocity=0.5)
+
+            # pc.down(TAKEOFF_HEIGHT - OFFSET_HEIGHT,0.2)
+            # time.sleep(STABLE_DELAY)
+            # print(f"{time.time():.4f} : after sleeping {STABLE_DELAY} seconds")
+
+            # pc.go_to(*GARAGE_CENTER, PARK_VEL)
+            # print(f"{time.time():.4f} : after moving to {GARAGE_CENTER}")
+
             time.sleep(1)
         print(f"{time.time():.4f} : landed")

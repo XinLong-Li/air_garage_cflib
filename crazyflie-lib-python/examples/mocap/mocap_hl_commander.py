@@ -211,7 +211,7 @@ def upload_trajectory(cf, trajectory_id, trajectory):
     return total_duration
 
 
-def run_sequence(cf, trajectory_id, duration):
+def run_sequence(cf: Crazyflie, trajectory_id, duration):
     commander = cf.high_level_commander
 
     commander.takeoff(0.15, 2.0)
