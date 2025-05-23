@@ -28,7 +28,7 @@ from cflib.utils import uri_helper
 import os
 import csv
 
-filename = None
+pose_file = None
 # URI to the Crazyflie to connect to
 uri = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E7')
 
@@ -42,10 +42,21 @@ send_full_pose = True
 orientation_std_dev = 4.5e-3
 
 # Duration,x^0,x^1,x^2,x^3,x^4,x^5,x^6,x^7,y^0,y^1,y^2,y^3,y^4,y^5,y^6,y^7,z^0,z^1,z^2,z^3,z^4,z^5,z^6,z^7,yaw^0,yaw^1,yaw^2,yaw^3,yaw^4,yaw^5,yaw^6,yaw^7
-straight_line = [
-    [1.60383,0,0,0,0,0.562414,-0.590316,0.230998,-0.0325465,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    [1.62329,0.5,0.581999,-7.80968e-16,-0.0539809,-0.0678949,-0.0773259,0.104529,-0.0263757,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+perching = [
+    [
+3.27915,-0.893,0,0,0,0.139055,-0.0881752,0.0198529,-0.00156649,0.066,0,0,0,6.93889e-18,-3.46945e-18,8.67362e-19,-5.42101e-20,0.78,0,0,0,-0.00316048,0.00260276,-0.000718775,6.67754e-05,0,0,0,0,0,0,0,0
+],
+    [
+0.580811,0.05,0.166761,-0.159887,0.00364116,-0.195871,0.443534,0.307612,-0.559203,0.066,-1.42089e-17,4.17751e-18,1.11844e-17,-3.55271e-15,1.42109e-14,-1.42109e-14,7.10543e-15,0.78,0.00495906,-0.00110507,0.00176088,-0.0482745,-0.0132188,0.161707,-0.120779,0,0,0,0,0,0,0,0
+],
+    [
+1.60973,0.1,0.0552975,0.0679368,0.0229362,0.458203,-0.804868,0.446703,-0.082478,0.066,5.16119e-17,3.88964e-17,-4.25519e-17,-2.77556e-16,4.44089e-16,-2.22045e-16,3.46945e-17,0.78,-0.00822532,-0.0132575,-0.00237447,-0.0598755,0.108957,-0.061407,0.0114353,0,0,0,0,0,0,0,0
+],
 ]
+
+
+
+
 
 def wait_for_position_estimator(scf):
     print('Waiting for estimator to find position...')
@@ -143,158 +154,102 @@ def upload_trajectory(cf, trajectory_id, trajectory):
     return total_duration
 
 
-def run_sequence(cf, trajectory_id, duration):
+def run_sequence(cf: Crazyflie, trajectory_id, duration,start_pos):
     commander = cf.high_level_commander
+    x, y, z = start_pos
 
-    commander.takeoff(0.15, 2.0)
-    time.sleep(3.0)
-    relative = True
+    commander.takeoff(0.2, 2.0)
+    commander.go_to(x=x, y=y, z=z, yaw=0.0, duration_s=6.0)
+
+    time.sleep(13.0)
+    relative =  False
+    # relative = True
+    traj_start_time = time.time()
     commander.start_trajectory(trajectory_id, 1.0, relative)
     time.sleep(duration)
     commander.land(0.0, 2.0)
     time.sleep(2)
     commander.stop()
+    with open(pose_file, 'a', newline='', encoding='utf-8') as cb_file:
+        traj_start_time_tracker = csv.writer(cb_file)
+        traj_start_time_tracker.writerow([traj_start_time])
 
 
-def figure_eight_flight(commander, radius, steps, velocity, default_height = 0.5):
-    """
-    Perform a horizontal figure-eight flight.
-
-    :param commander: The commander object that has the go_to method.
-    :param radius: The radius of the figure-eight loops.
-    :param steps: The number of steps to divide each loop into.
-    :param velocity: The velocity of the movement.
-    """
-    for i in range(steps):
-        angle = 2 * math.pi * (i / steps)
-        x = radius * math.sin(angle)
-        y = radius * math.sin(2 * angle)
-        commander.go_to(x, y, default_height, velocity)
-        time.sleep(0.1)  # Adjust sleep time as needed
-
-
-def spiral_ascent(commander: PositionHlCommander, 
-                  radius, height, turns, steps, velocity, initial_height = 0.5) -> None:
-    """
-    Perform a spiral ascent.
-
-    :param commander: The commander object that has the go_to method.
-    :param radius: The radius of the spiral.
-    :param height: The total height to ascend.
-    :param turns: The number of turns in the spiral.
-    :param steps: The number of steps to divide the spiral into.
-    :param velocity: The velocity of the movement.
-    """
-    for i in range(steps):
-        angle = 2 * math.pi * turns * (i / steps)
-        x = radius * math.cos(angle)
-        y = radius * math.sin(angle)
-        z = (height / steps) * i + initial_height
-        commander.go_to(x, y, z, velocity)
-        time.sleep(0.1)  # Adjust sleep time as needed
-
-def move_straight(pc: PositionHlCommander, x, y, z, velocity):
-    """
-    Moves the object in a straight line to the specified coordinates.
-
-    :param pc: The object that has the go_to method.
-    :param x: The target x-coordinate.
-    :param y: The target y-coordinate.
-    :param z: The target z-coordinate.
-    :param velocity: the velocity of the movement.
-    """
-    print(f"{time.time():.4f} : before moving to ({x}, {y}, {z})")
-    pc.go_to(x, y, z, velocity)
-    print(f"{time.time():.4f} : after moving to ({x}, {y}, {z})")
 
 
 def pose_callback(data):
     '''
     callback function for the crazyflie pose subscriber
+
+    data: the pose data from the mocap system, ROS message type is geometry_msgs/PoseStamped
     '''
     t = time.time()
-    global filename  # Declare filename as global to modify the global variable
+    global pose_file  # Declare pose_file as global to modify the global variable
     pose = [data.pose.position.x, data.pose.position.y, data.pose.position.z, data.pose.orientation]
     send_extpose_quat(cf, pose[0], pose[1], pose[2], pose[3]) # x, y, z, quat
-    with open(filename, 'a', newline='', encoding='utf-8') as cb_file:
+    with open(pose_file, 'a', newline='', encoding='utf-8') as cb_file:
         pose_writer = csv.writer(cb_file)
         pose_writer.writerow([t, pose[0], pose[1], pose[2], pose[3].x, pose[3].y, pose[3].z, pose[3].w])
 
-def land_on_elevated_surface():
-    with SyncCrazyflie(uri, cf=Crazyflie(rw_cache='./cache')) as scf:
-        with PositionHlCommander(scf,
-                                 default_height=0.5,
-                                 default_velocity=0.2,
-                                 default_landing_height=0.35,
-                                 controller=PositionHlCommander.CONTROLLER_PID) as pc:
-            # fly onto a landing platform at non-zero height (ex: from floor to desk, etc)
-            pc.forward(1.0)
-            pc.left(1.0)
-            # land() will be called on context exit, gradually lowering to default_landing_height, then stopping motors
+def hover(scf: SyncCrazyflie):
+    with PositionHlCommander(scf, 
+                             x = -0.893,
+                             y =  0.066,
+                             z =  0.033,
+                             default_velocity=0.2,
+                             default_height=0.82 ) as pc:
+        time.sleep(5)
+        pc.go_to(x=-0.893, y=0.066, z=0.82, yaw=0.0, duration_s=5.0)
+        time.sleep(8)
+        pc.go_to(x=0.238, y=0.066, z=0.78, yaw=0.0, duration_s=5.0)
+        time.sleep(8)
+
+def hover2(scf:SyncCrazyflie,start_pos=[0,0,0],end_pos=[0,0,0]):
+    cf= scf.cf
+    # x, y, z = start_pos
+    # x_end, y_end, z_end = end_pos
+    cf.high_level_commander.takeoff(0.5, 2.0)
+    time.sleep(10.0)
+    # cf.high_level_commander.go_to(x=x, y=y, z=z, yaw=0.0, duration_s=6.0)
+    # time.sleep(10.0)
+    # cf.high_level_commander.go_to(x=x_end, y=y_end, z=z_end, yaw=0.0, duration_s=6.0) 
+    # time.sleep(10.0)
+    cf.high_level_commander.land(absolute_height_m=0.0, duration_s=2.0) #absolute height is the final height
+    time.sleep(2.0)
+    cf.high_level_commander.stop()
+
 
 
 if __name__ == '__main__':
     print(f"{time.time():.4f} : Start the program")
     cflib.crtp.init_drivers()
 
-    filename = os.path.join('mocap_data', datetime.now().strftime('%Y%m%d_%H_%M_%S') + '.csv')
-    with open(filename, 'w', newline='', encoding='utf-8') as file:
+    pose_file = os.path.join('mocap_data', datetime.now().strftime('%Y%m%d_%H_%M_%S') + '.csv')
+    with open(pose_file, 'w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
         writer.writerow(['t', 'x', 'y', 'z', 'qx', 'qy', 'qz', 'qw'])
 
-    filename_collection = 'mocap_data_description.md'
-    with open(filename_collection, 'a', encoding='utf-8') as file:
-        file.write(f'`{filename}`\n')
+    pose_file_collection = 'mocap_data_description.md'
+    with open(pose_file_collection, 'a', encoding='utf-8') as file:
+        file.write(f'`{pose_file}`\n')
 
     with SyncCrazyflie(uri, cf=Crazyflie(rw_cache='./cache')) as scf:
         cf = scf.cf
         trajectory_id = 1
+        start_pos = [-0.893, 0.066, 0.775]
+        # end_pos = [0.283, 0.066, 0.78]
+        # start_pos = [-0.893, 0.066, 0.78]
 
         rospy.init_node('cf_lxl_node', anonymous=True)
         rospy.Subscriber("/vrpn_client_node/cf_lxl/pose", PoseStamped, pose_callback)
 
         adjust_orientation_sensitivity(cf)
         activate_kalman_estimator(cf)
+        # activate_mellinger_controller(cf)
+        duration = upload_trajectory(cf, trajectory_id, perching)
+        print('The sequence is {:.1f} seconds long'.format(duration))
         reset_estimator(cf)
-
-        # print(f"{time.time():.4f} : start MotionCommander")
-        # I have add a parameter 'velocity' to the original initialization function.
-        # with MotionCommander(scf,0.5,0.1) as mc:
-        #     print(f"{time.time():.4f} : taking off")
-        #     # mc.forward(1.0,0.5) # This command can be used to execute a uniform speed trajectory.
-        #     time.sleep(1)
-        #     print(f"{time.time():.4f} : after sleeping 1 seconds")
-        #     mc.move_distance(1.0, 0.0, 0.0, 0.5)
-        #     print(f"{time.time():.4f} : after moving 1.0m")
-        #     time.sleep(1)
-        #     print(f"{time.time():.4f} : landing")
-
-        X_INIT = 0.001
-        Y_INIT = 0.001
-        Z_INIT = 0.027
-        TAKEOFF_HEIGHT = 0.5 # Height to take off from table plane
-        OFFSET_HEIGHT = 0.01 # Height offset to table plane
-        STABLE_DELAY = 15 # Time delay to stabilize after height change
-        GARAGE_CENTER = (1, 0.0, Z_INIT) # Center of garage
-        PARK_VEL = 1
-        print(f"{time.time():.4f} : start PositionHlCommander")
-        with PositionHlCommander(scf, X_INIT, Y_INIT, Z_INIT,
-                                 default_velocity = 0.5,
-                                 default_height = Z_INIT + TAKEOFF_HEIGHT,
-                                 default_landing_height = Z_INIT) as pc:
-            
-            print(f"{time.time():.4f} : taking off")
-            time.sleep(STABLE_DELAY)
-            print(f"{time.time():.4f} : after sleeping {STABLE_DELAY} seconds")
-
-            # spiral_ascent(pc, 0.3, 0.5, 2, 50, 1)
-
-            # pc.down(TAKEOFF_HEIGHT - OFFSET_HEIGHT,0.2)
-            # time.sleep(STABLE_DELAY)
-            # print(f"{time.time():.4f} : after sleeping {STABLE_DELAY} seconds")
-
-            # pc.go_to(*GARAGE_CENTER, PARK_VEL)
-            # print(f"{time.time():.4f} : after moving to {GARAGE_CENTER}")
-
-            time.sleep(1)
+        # hover2(scf,start_pos,end_pos)
+        run_sequence(cf, trajectory_id, duration,start_pos)
+        # hover2(scf)
         print(f"{time.time():.4f} : landed")
